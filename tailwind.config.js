@@ -6,7 +6,7 @@ export default {
       colors: {
         panel: '#fff7ef',
         line: '#ead1b9',
-        glow: '#f6b94a',
+         glow: '#f6b94a',
         cyan: '#d27a3b',
         pink: '#d96f4d',
         ink: '#3d2a1f',
