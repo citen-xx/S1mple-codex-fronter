@@ -521,7 +521,7 @@ onBeforeUnmount(() => {
         </div>
       </header>
 
-      <section class="grid flex-1 min-h-0 gap-5 xl:grid-cols-[minmax(380px,0.9fr)_minmax(620px,1.35fr)]">
+      <section class="grid flex-1 min-h-0 gap-5 xl:grid-cols-[minmax(360px,0.82fr)_minmax(760px,1.48fr)]">
         <aside class="warm-card rounded-[30px] border border-orange-950/10 p-5 shadow-soft xl:min-h-0 xl:flex xl:flex-col xl:overflow-hidden">
           <div class="mb-4 flex items-center justify-between">
             <div>
@@ -591,8 +591,8 @@ onBeforeUnmount(() => {
           </div>
         </aside>
 
-        <section class="grid min-h-[780px] min-w-0 gap-5 xl:min-h-0 xl:grid-rows-[minmax(0,1fr)_minmax(340px,0.86fr)]">
-          <div class="editor-shell min-h-[420px] min-w-0 rounded-[30px] border border-orange-950/10 p-4 shadow-warm xl:min-h-0 xl:flex xl:flex-col">
+        <section class="grid min-h-[780px] min-w-0 gap-5 xl:min-h-0 xl:grid-rows-[minmax(0,1.22fr)_minmax(240px,0.58fr)]">
+          <div class="editor-shell min-h-[520px] min-w-0 rounded-[30px] border border-orange-950/10 p-4 shadow-warm xl:min-h-0 xl:flex xl:flex-col">
             <div class="mb-4 flex shrink-0 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p class="font-mono text-xs uppercase tracking-[0.3em] text-amber-200/70">Code Workspace</p>
@@ -620,7 +620,7 @@ onBeforeUnmount(() => {
 
             <div class="mb-3 flex items-center justify-between text-xs text-amber-100/75">
               <span>当前语言：{{ language.toUpperCase() }}</span>
-              <span>Monaco Editor · Automatic Layout</span>
+              <span>Monaco Editor · LeetCode Style Layout</span>
             </div>
 
             <div class="mb-4 h-1.5 shrink-0 overflow-hidden rounded-full bg-black/20">
@@ -629,11 +629,11 @@ onBeforeUnmount(() => {
 
             <div
               ref="editorRef"
-              class="min-h-[340px] min-w-0 flex-1 overflow-hidden rounded-[24px] border border-amber-100/10 xl:min-h-0"
+              class="min-h-[440px] min-w-0 flex-1 overflow-hidden rounded-[24px] border border-amber-100/10 xl:min-h-0"
             ></div>
           </div>
 
-          <div class="console-shell min-h-[320px] rounded-[30px] border border-orange-950/10 p-4 shadow-soft xl:min-h-0 xl:flex xl:flex-col">
+          <div class="console-shell min-h-[260px] rounded-[30px] border border-orange-950/10 p-4 shadow-soft xl:min-h-0 xl:flex xl:flex-col">
             <div class="mb-4 shrink-0 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p class="font-mono text-xs uppercase tracking-[0.3em] text-stone-500">Runtime Console</p>
@@ -650,7 +650,7 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <div ref="consoleRef" class="grid min-h-[240px] flex-1 gap-4 overflow-y-auto pr-1 lg:grid-cols-[0.92fr_1.08fr] xl:min-h-0">
+            <div ref="consoleRef" class="grid min-h-[180px] flex-1 gap-4 overflow-y-auto pr-1 lg:grid-cols-[0.9fr_1.1fr] xl:min-h-0">
               <section class="rounded-[24px] border border-orange-950/10 bg-[#fff7ef] p-4">
                 <div class="mb-3 flex items-center justify-between">
                   <span class="font-mono text-[11px] uppercase tracking-[0.24em] text-stone-500">Judge Output</span>
