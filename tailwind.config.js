@@ -18,7 +18,7 @@ export default {
         warm: '0 24px 60px rgba(113, 58, 21, 0.22)'
       },
       fontFamily: {
-        display: ['"Segoe UI"', '"PingFang SC"', '"Microsoft YaHei"', 'sans-serif'],
+        display: ['"Segoe UI"',  '"PingFang SC"', '"Microsoft YaHei"', 'sans-serif'],
         mono: ['"Cascadia Code"',  'Consolas', '"JetBrains Mono"', 'monospace']
       },
       backgroundImage: {
