@@ -19,7 +19,7 @@ export default {
       },
       fontFamily: {
         display: ['"Segoe UI"', '"PingFang SC"', '"Microsoft YaHei"', 'sans-serif'],
-        mono: ['"Cascadia Code"', 'Consolas', '"JetBrains Mono"', 'monospace']
+        mono: ['"Cascadia Code"',  'Consolas', '"JetBrains Mono"', 'monospace']
       },
       backgroundImage: {
         grid: 'linear-gradient(rgba(185, 112, 55, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(185, 112, 55, 0.08) 1px, transparent 1px)'
