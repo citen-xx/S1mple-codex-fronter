@@ -8,6 +8,7 @@
 
 body {
   @apply min-h-screen font-display text-stone-900 antialiased;
+  overflow-y: scroll;
   background-image:
     radial-gradient(circle at top left, rgba(251, 191, 36, 0.28), transparent 24%),
     radial-gradient(circle at top right, rgba(251, 146, 60, 0.24), transparent 22%),

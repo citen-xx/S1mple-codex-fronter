@@ -422,44 +422,44 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="warm-stage relative min-h-screen overflow-hidden">
+  <div class="warm-stage relative min-h-screen">
     <div class="pointer-events-none absolute inset-0 warm-pattern opacity-80"></div>
     <div class="pointer-events-none absolute -left-24 top-16 h-72 w-72 rounded-full bg-orange-200/55 blur-3xl"></div>
     <div class="pointer-events-none absolute right-[-6rem] top-10 h-80 w-80 rounded-full bg-amber-300/45 blur-3xl"></div>
     <div class="pointer-events-none absolute bottom-[-5rem] left-1/3 h-72 w-72 rounded-full bg-rose-200/35 blur-3xl"></div>
 
-    <main class="relative mx-auto flex min-h-screen max-w-[1800px] flex-col px-4 py-5 lg:px-6 xl:h-screen xl:overflow-hidden">
-      <header class="warm-card relative mb-5 shrink-0 overflow-hidden rounded-[32px] border border-orange-950/10 px-6 py-6 shadow-warm glass">
+    <main class="relative mx-auto flex min-h-screen max-w-[1880px] flex-col px-4 py-4 lg:px-6 lg:py-5">
+      <header class="warm-card relative mb-4 shrink-0 overflow-hidden rounded-[28px] border border-orange-950/10 px-5 py-4 shadow-warm glass">
         <div class="warm-radial pointer-events-none absolute right-0 top-0 h-full w-[42%] opacity-55"></div>
-        <div class="relative grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(360px,0.8fr)] xl:items-start">
+        <div class="relative grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] xl:items-start">
           <div>
             <p class="font-mono text-xs uppercase tracking-[0.32em] text-orange-900/70">Simple AI OJ Workspace</p>
-            <h1 class="mt-3 text-4xl font-bold tracking-tight text-stone-900 lg:text-[3.3rem]">题目评测工作台</h1>
-            <p class="mt-3 max-w-3xl text-sm leading-7 text-stone-700">
+            <h1 class="mt-2 text-3xl font-bold tracking-tight text-stone-900 lg:text-4xl">题目评测工作台</h1>
+            <p class="mt-2 max-w-3xl text-sm leading-6 text-stone-700">
               保留当前暖色调基础上，重新整理为更偏专业产品界面的信息结构。左侧聚焦题面与用例，右侧聚焦编写、评测和 AI 辅导，减少装饰性文案干扰。
             </p>
 
-            <div class="mt-5 grid gap-3 sm:grid-cols-3">
-              <div class="rounded-2xl border border-orange-950/10 bg-white/55 px-4 py-3">
+            <div class="mt-4 grid gap-3 sm:grid-cols-3">
+              <div class="rounded-2xl border border-orange-950/10 bg-white/55 px-4 py-2.5">
                 <div class="font-mono text-[11px] uppercase tracking-[0.22em] text-stone-500">Backend</div>
-                <div class="mt-2 text-sm font-medium text-stone-800">{{ remoteLabel }}</div>
+                <div class="mt-1.5 text-sm font-medium text-stone-800">{{ remoteLabel }}</div>
               </div>
-              <div class="rounded-2xl border border-orange-950/10 bg-white/55 px-4 py-3">
+              <div class="rounded-2xl border border-orange-950/10 bg-white/55 px-4 py-2.5">
                 <div class="font-mono text-[11px] uppercase tracking-[0.22em] text-stone-500">Current Question</div>
-                <div class="mt-2 text-sm font-medium text-stone-800">{{ currentQuestionDisplay }}</div>
+                <div class="mt-1.5 text-sm font-medium text-stone-800">{{ currentQuestionDisplay }}</div>
               </div>
-              <div class="rounded-2xl border border-orange-950/10 bg-white/55 px-4 py-3">
+              <div class="rounded-2xl border border-orange-950/10 bg-white/55 px-4 py-2.5">
                 <div class="font-mono text-[11px] uppercase tracking-[0.22em] text-stone-500">Judge Status</div>
-                <div class="mt-2 text-sm font-medium text-stone-800">{{ consoleState.status }}</div>
+                <div class="mt-1.5 text-sm font-medium text-stone-800">{{ consoleState.status }}</div>
               </div>
             </div>
           </div>
 
-          <div class="rounded-[28px] border border-orange-950/10 bg-white/55 p-4 shadow-sm">
-            <div class="mb-4 flex items-center justify-between">
+          <div class="rounded-[24px] border border-orange-950/10 bg-white/55 p-3.5 shadow-sm">
+            <div class="mb-3 flex items-center justify-between">
               <div>
                 <div class="font-mono text-[11px] uppercase tracking-[0.22em] text-stone-500">Control Panel</div>
-                <div class="mt-2 text-lg font-semibold text-stone-900">题目与运行参数</div>
+                <div class="mt-1.5 text-base font-semibold text-stone-900">题目与运行参数</div>
               </div>
               <span class="warm-chip bg-amber-50/80 text-stone-700">Live</span>
             </div>
@@ -521,7 +521,7 @@ onBeforeUnmount(() => {
         </div>
       </header>
 
-      <section class="grid flex-1 min-h-0 gap-5 xl:grid-cols-[minmax(360px,0.82fr)_minmax(760px,1.48fr)]">
+      <section class="grid flex-1 gap-5 xl:grid-cols-[minmax(320px,0.7fr)_minmax(860px,1.7fr)]">
         <aside class="warm-card rounded-[30px] border border-orange-950/10 p-5 shadow-soft xl:min-h-0 xl:flex xl:flex-col xl:overflow-hidden">
           <div class="mb-4 flex items-center justify-between">
             <div>
@@ -591,8 +591,8 @@ onBeforeUnmount(() => {
           </div>
         </aside>
 
-        <section class="grid min-h-[780px] min-w-0 gap-5 xl:min-h-0 xl:grid-rows-[minmax(0,1.22fr)_minmax(240px,0.58fr)]">
-          <div class="editor-shell min-h-[520px] min-w-0 rounded-[30px] border border-orange-950/10 p-4 shadow-warm xl:min-h-0 xl:flex xl:flex-col">
+        <section class="grid min-h-[900px] min-w-0 gap-5 xl:grid-rows-[minmax(620px,1.58fr)_minmax(220px,0.42fr)]">
+          <div class="editor-shell min-h-[620px] min-w-0 rounded-[30px] border border-orange-950/10 p-4 shadow-warm xl:flex xl:flex-col">
             <div class="mb-4 flex shrink-0 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p class="font-mono text-xs uppercase tracking-[0.3em] text-amber-200/70">Code Workspace</p>
@@ -629,11 +629,11 @@ onBeforeUnmount(() => {
 
             <div
               ref="editorRef"
-              class="min-h-[440px] min-w-0 flex-1 overflow-hidden rounded-[24px] border border-amber-100/10 xl:min-h-0"
+              class="min-h-[540px] min-w-0 flex-1 overflow-hidden rounded-[24px] border border-amber-100/10"
             ></div>
           </div>
 
-          <div class="console-shell min-h-[260px] rounded-[30px] border border-orange-950/10 p-4 shadow-soft xl:min-h-0 xl:flex xl:flex-col">
+          <div class="console-shell min-h-[220px] rounded-[30px] border border-orange-950/10 p-4 shadow-soft xl:flex xl:flex-col">
             <div class="mb-4 shrink-0 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p class="font-mono text-xs uppercase tracking-[0.3em] text-stone-500">Runtime Console</p>
@@ -650,7 +650,7 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <div ref="consoleRef" class="grid min-h-[180px] flex-1 gap-4 overflow-y-auto pr-1 lg:grid-cols-[0.9fr_1.1fr] xl:min-h-0">
+            <div ref="consoleRef" class="grid min-h-[160px] flex-1 gap-4 overflow-y-auto pr-1 lg:grid-cols-[0.9fr_1.1fr]">
               <section class="rounded-[24px] border border-orange-950/10 bg-[#fff7ef] p-4">
                 <div class="mb-3 flex items-center justify-between">
                   <span class="font-mono text-[11px] uppercase tracking-[0.24em] text-stone-500">Judge Output</span>
