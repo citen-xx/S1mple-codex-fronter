@@ -97,6 +97,12 @@ const statusTone = computed(() => {
 
 const remoteLabel = computed(() => apiBase || 'Vite /api proxy')
 const currentCode = () => (editor ? editor.getValue() : codeTemplates[language.value])
+const currentQuestionDisplay = computed(() => {
+  if (!questionDetail.question.id) {
+    return '当前未加载题目'
+  }
+  return `#${questionDetail.question.id} ${questionDetail.question.title}`
+})
 
 function buildApiUrl(path) {
   return `${apiBase}${path}`
@@ -122,7 +128,7 @@ function scrollConsoleToBottom() {
 function resetQuestionDetail() {
   questionDetail.question = {
     id: null,
-    title: '暂无题目..',
+    title: '暂无题目',
     content: '',
     difficulty: '',
     timeLimit: 1000,
@@ -216,7 +222,7 @@ async function fetchQuestionList() {
       return false
     }
 
-    questionSummary.value = `远程服务器共有 ${result.data.length} 道题`
+    questionSummary.value = `当前题库共 ${result.data.length} 道题`
 
     const exists = result.data.some((item) => item.id === questionId.value)
     if (!exists) {
@@ -423,51 +429,106 @@ onBeforeUnmount(() => {
     <div class="pointer-events-none absolute bottom-[-5rem] left-1/3 h-72 w-72 rounded-full bg-rose-200/35 blur-3xl"></div>
 
     <main class="relative mx-auto flex min-h-screen max-w-[1800px] flex-col px-4 py-5 lg:px-6 xl:h-screen xl:overflow-hidden">
-      <header class="warm-card relative mb-5 shrink-0 overflow-hidden rounded-[32px] border border-orange-950/10 px-5 py-5 shadow-warm glass">
-        <div class="warm-radial pointer-events-none absolute right-0 top-0 h-full w-1/2 opacity-60"></div>
-        <div class="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div class="max-w-3xl">
-            <p class="font-mono text-xs uppercase tracking-[0.35em] text-orange-900/70">Simple AI OJ</p>
-            <h1 class="mt-3 text-4xl font-bold text-stone-900 lg:text-5xl">暖光刷题台</h1>
-            <p class="mt-3 max-w-2xl text-sm leading-7 text-stone-700">
-              把原来的冷色控制台改成了更柔和的暖色界面。题面区像纸张卡片，代码区像深色烘焙工作台，控制台则偏焦糖色，整体更适合长时间阅读和写题。
+      <header class="warm-card relative mb-5 shrink-0 overflow-hidden rounded-[32px] border border-orange-950/10 px-6 py-6 shadow-warm glass">
+        <div class="warm-radial pointer-events-none absolute right-0 top-0 h-full w-[42%] opacity-55"></div>
+        <div class="relative grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(360px,0.8fr)] xl:items-start">
+          <div>
+            <p class="font-mono text-xs uppercase tracking-[0.32em] text-orange-900/70">Simple AI OJ Workspace</p>
+            <h1 class="mt-3 text-4xl font-bold tracking-tight text-stone-900 lg:text-[3.3rem]">题目评测工作台</h1>
+            <p class="mt-3 max-w-3xl text-sm leading-7 text-stone-700">
+              保留当前暖色调基础上，重新整理为更偏专业产品界面的信息结构。左侧聚焦题面与用例，右侧聚焦编写、评测和 AI 辅导，减少装饰性文案干扰。
             </p>
-            <div class="mt-4 flex flex-wrap items-center gap-3">
-              <span class="rounded-full border border-orange-950/10 bg-white/55 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.25em] text-stone-700">
-                Backend: {{ remoteLabel }}
-              </span>
-              <span v-if="questionSummary" class="rounded-full border border-orange-950/10 bg-amber-50/80 px-3 py-1 text-xs text-stone-700">
-                {{ questionSummary }}
-              </span>
+
+            <div class="mt-5 grid gap-3 sm:grid-cols-3">
+              <div class="rounded-2xl border border-orange-950/10 bg-white/55 px-4 py-3">
+                <div class="font-mono text-[11px] uppercase tracking-[0.22em] text-stone-500">Backend</div>
+                <div class="mt-2 text-sm font-medium text-stone-800">{{ remoteLabel }}</div>
+              </div>
+              <div class="rounded-2xl border border-orange-950/10 bg-white/55 px-4 py-3">
+                <div class="font-mono text-[11px] uppercase tracking-[0.22em] text-stone-500">Current Question</div>
+                <div class="mt-2 text-sm font-medium text-stone-800">{{ currentQuestionDisplay }}</div>
+              </div>
+              <div class="rounded-2xl border border-orange-950/10 bg-white/55 px-4 py-3">
+                <div class="font-mono text-[11px] uppercase tracking-[0.22em] text-stone-500">Judge Status</div>
+                <div class="mt-2 text-sm font-medium text-stone-800">{{ consoleState.status }}</div>
+              </div>
             </div>
           </div>
 
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <label class="warm-input flex items-center gap-3 rounded-[22px] px-4 py-3">
-              <span class="font-mono text-xs uppercase tracking-[0.2em] text-stone-500">Question ID</span>
-              <input
-                v-model.number="questionId"
-                type="number"
-                min="1"
-                class="w-24 bg-transparent font-mono text-sm text-stone-900 outline-none"
-              />
-            </label>
+          <div class="rounded-[28px] border border-orange-950/10 bg-white/55 p-4 shadow-sm">
+            <div class="mb-4 flex items-center justify-between">
+              <div>
+                <div class="font-mono text-[11px] uppercase tracking-[0.22em] text-stone-500">Control Panel</div>
+                <div class="mt-2 text-lg font-semibold text-stone-900">题目与运行参数</div>
+              </div>
+              <span class="warm-chip bg-amber-50/80 text-stone-700">Live</span>
+            </div>
 
-            <button
-              class="warm-button-primary rounded-[22px] px-5 py-3 text-sm font-semibold transition"
-              :disabled="questionLoading"
-              @click="loadQuestion"
-            >
-              {{ questionLoading ? '载入中...' : '载入题目' }}
-            </button>
+            <div class="grid gap-3">
+              <label class="block">
+                <div class="mb-2 font-mono text-[11px] uppercase tracking-[0.18em] text-stone-500">Question</div>
+                <select
+                  v-model.number="questionId"
+                  class="warm-input w-full rounded-[18px] px-4 py-3 text-sm text-stone-900 outline-none"
+                >
+                  <option v-if="availableQuestions.length === 0" :value="questionId">Question #{{ questionId }}</option>
+                  <option
+                    v-for="item in availableQuestions"
+                    :key="item.id"
+                    :value="item.id"
+                  >
+                    #{{ item.id }} {{ item.title }}
+                  </option>
+                </select>
+              </label>
+
+              <div class="grid gap-3 sm:grid-cols-2">
+                <label class="block">
+                  <div class="mb-2 font-mono text-[11px] uppercase tracking-[0.18em] text-stone-500">Question ID</div>
+                  <input
+                    v-model.number="questionId"
+                    type="number"
+                    min="1"
+                    class="warm-input w-full rounded-[18px] px-4 py-3 text-sm text-stone-900 outline-none"
+                  />
+                </label>
+
+                <label class="block">
+                  <div class="mb-2 font-mono text-[11px] uppercase tracking-[0.18em] text-stone-500">Language</div>
+                  <select
+                    v-model="language"
+                    class="warm-input w-full rounded-[18px] px-4 py-3 text-sm text-stone-900 outline-none"
+                  >
+                    <option value="java">Java</option>
+                    <option value="cpp">C++</option>
+                  </select>
+                </label>
+              </div>
+
+              <button
+                class="warm-button-primary mt-1 rounded-[18px] px-5 py-3 text-sm font-semibold transition"
+                :disabled="questionLoading"
+                @click="loadQuestion"
+              >
+                {{ questionLoading ? '载入中...' : '载入题目' }}
+              </button>
+
+              <div v-if="questionSummary" class="rounded-2xl border border-orange-950/10 bg-amber-50/75 px-4 py-3 text-sm text-stone-700">
+                {{ questionSummary }}
+              </div>
+            </div>
           </div>
         </div>
       </header>
 
-      <section class="grid flex-1 min-h-0 gap-5 xl:grid-cols-[minmax(360px,0.92fr)_minmax(560px,1.4fr)]">
+      <section class="grid flex-1 min-h-0 gap-5 xl:grid-cols-[minmax(380px,0.9fr)_minmax(620px,1.35fr)]">
         <aside class="warm-card rounded-[30px] border border-orange-950/10 p-5 shadow-soft xl:min-h-0 xl:flex xl:flex-col xl:overflow-hidden">
-          <div class="shrink-0">
-            <div class="mb-4 flex flex-wrap items-center gap-3">
+          <div class="mb-4 flex items-center justify-between">
+            <div>
+              <p class="font-mono text-[11px] uppercase tracking-[0.24em] text-stone-500">Problem Overview</p>
+              <h2 class="mt-2 text-2xl font-semibold text-stone-900">题目详情</h2>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
               <span class="warm-chip bg-white/70 text-stone-700">#{{ questionDetail.question.id ?? '--' }}</span>
               <span class="warm-chip" :class="difficultyTone">
                 {{ questionDetail.question.difficulty || 'Unknown' }}
@@ -475,25 +536,25 @@ onBeforeUnmount(() => {
               <span class="warm-chip bg-white/70 text-stone-700">{{ questionDetail.question.timeLimit }} ms</span>
               <span class="warm-chip bg-white/70 text-stone-700">{{ questionDetail.question.memoryLimit }} MB</span>
             </div>
+          </div>
 
-            <div class="paper-card rounded-[26px] p-5">
-              <div class="mb-4 flex items-start justify-between gap-4">
-                <div>
-                  <h2 class="text-3xl font-bold text-stone-900">{{ questionDetail.question.title }}</h2>
-                  <p class="mt-2 text-sm text-stone-500">Read slowly, solve steadily.</p>
-                </div>
-                <div class="stamp-badge hidden rounded-full px-3 py-2 text-[11px] font-bold uppercase tracking-[0.25em] text-orange-900 md:block">
-                  Problem
-                </div>
+          <div class="paper-card rounded-[26px] p-5">
+            <div class="mb-4 flex items-start justify-between gap-4">
+              <div>
+                <h3 class="text-3xl font-bold text-stone-900">{{ questionDetail.question.title }}</h3>
+                <p class="mt-2 text-sm text-stone-500">题面、约束和测试输入输出都集中在这里。</p>
               </div>
-
-              <p v-if="questionError" class="mt-4 rounded-2xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-900">
-                {{ questionError }}
-              </p>
-
-              <div class="mt-4 whitespace-pre-wrap text-sm leading-7 text-stone-700">
-                {{ questionDetail.question.content || '暂无题面内容。' }}
+              <div class="stamp-badge hidden rounded-full px-3 py-2 text-[11px] font-bold uppercase tracking-[0.25em] text-orange-900 md:block">
+                Problem
               </div>
+            </div>
+
+            <p v-if="questionError" class="mt-4 rounded-2xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-900">
+              {{ questionError }}
+            </p>
+
+            <div class="mt-4 whitespace-pre-wrap text-sm leading-7 text-stone-700">
+              {{ questionDetail.question.content || '暂无题面内容。' }}
             </div>
           </div>
 
@@ -514,6 +575,7 @@ onBeforeUnmount(() => {
                 <div class="mb-3 flex items-center justify-between">
                   <span class="font-mono text-xs uppercase tracking-[0.24em] text-orange-900/80">Case {{ testCase.id }}</span>
                 </div>
+
                 <div class="grid gap-3 md:grid-cols-2">
                   <div class="rounded-2xl border border-orange-950/10 bg-[#fff7ef] p-3">
                     <div class="mb-2 font-mono text-[11px] uppercase tracking-[0.22em] text-stone-500">Input</div>
@@ -529,23 +591,15 @@ onBeforeUnmount(() => {
           </div>
         </aside>
 
-        <section class="grid min-h-[780px] min-w-0 gap-5 xl:min-h-0 xl:grid-rows-[minmax(0,1fr)_minmax(320px,0.84fr)]">
+        <section class="grid min-h-[780px] min-w-0 gap-5 xl:min-h-0 xl:grid-rows-[minmax(0,1fr)_minmax(340px,0.86fr)]">
           <div class="editor-shell min-h-[420px] min-w-0 rounded-[30px] border border-orange-950/10 p-4 shadow-warm xl:min-h-0 xl:flex xl:flex-col">
             <div class="mb-4 flex shrink-0 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <p class="font-mono text-xs uppercase tracking-[0.3em] text-amber-200/70">Code Arena</p>
-                <h3 class="mt-2 text-2xl font-semibold text-amber-50">Monaco Editor</h3>
+                <p class="font-mono text-xs uppercase tracking-[0.3em] text-amber-200/70">Code Workspace</p>
+                <h3 class="mt-2 text-2xl font-semibold text-amber-50">代码编辑区</h3>
               </div>
 
               <div class="flex flex-wrap items-center gap-3">
-                <select
-                  v-model="language"
-                  class="rounded-[20px] border border-amber-100/15 bg-[#3b241c] px-4 py-3 font-mono text-sm text-amber-50 outline-none"
-                >
-                  <option value="java">Java</option>
-                  <option value="cpp">C++</option>
-                </select>
-
                 <button
                   class="warm-button-success rounded-[20px] px-5 py-3 text-sm font-semibold transition"
                   :disabled="runLoading"
@@ -564,6 +618,11 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
+            <div class="mb-3 flex items-center justify-between text-xs text-amber-100/75">
+              <span>当前语言：{{ language.toUpperCase() }}</span>
+              <span>Monaco Editor · Automatic Layout</span>
+            </div>
+
             <div class="mb-4 h-1.5 shrink-0 overflow-hidden rounded-full bg-black/20">
               <div class="h-full w-full origin-left rounded-full bg-gradient-to-r from-amber-300 via-orange-300 to-rose-300 animate-pulsebar"></div>
             </div>
@@ -577,8 +636,8 @@ onBeforeUnmount(() => {
           <div class="console-shell min-h-[320px] rounded-[30px] border border-orange-950/10 p-4 shadow-soft xl:min-h-0 xl:flex xl:flex-col">
             <div class="mb-4 shrink-0 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <p class="font-mono text-xs uppercase tracking-[0.3em] text-stone-500">Console Matrix</p>
-                <h3 class="mt-2 text-2xl font-semibold text-stone-900">运行结果与 AI 辅导</h3>
+                <p class="font-mono text-xs uppercase tracking-[0.3em] text-stone-500">Runtime Console</p>
+                <h3 class="mt-2 text-2xl font-semibold text-stone-900">评测结果与 AI 辅导</h3>
               </div>
 
               <div class="flex flex-wrap items-center gap-3">
@@ -591,12 +650,13 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <div ref="consoleRef" class="grid min-h-[240px] flex-1 gap-4 overflow-y-auto pr-1 lg:grid-cols-[0.9fr_1.1fr] xl:min-h-0">
+            <div ref="consoleRef" class="grid min-h-[240px] flex-1 gap-4 overflow-y-auto pr-1 lg:grid-cols-[0.92fr_1.08fr] xl:min-h-0">
               <section class="rounded-[24px] border border-orange-950/10 bg-[#fff7ef] p-4">
                 <div class="mb-3 flex items-center justify-between">
                   <span class="font-mono text-[11px] uppercase tracking-[0.24em] text-stone-500">Judge Output</span>
                   <span class="text-xs text-stone-500">{{ consoleState.message }}</span>
                 </div>
+
                 <pre class="min-h-28 whitespace-pre-wrap rounded-2xl border border-orange-950/10 bg-white/75 p-4 font-mono text-sm leading-6 text-stone-800">{{ consoleState.output || '暂无输出' }}</pre>
 
                 <div class="mt-4 space-y-2">
@@ -621,6 +681,7 @@ onBeforeUnmount(() => {
                   <span class="font-mono text-[11px] uppercase tracking-[0.24em] text-stone-500">Tongyi Coach</span>
                   <span class="text-xs text-stone-500">SSE Stream</span>
                 </div>
+
                 <div class="paper-card min-h-28 whitespace-pre-wrap rounded-2xl p-4 font-mono text-sm leading-7 text-stone-800">
                   {{ consoleState.aiAdvice }}
                   <span v-if="aiLoading" class="ml-1 inline-block h-4 w-2 animate-pulse bg-orange-500 align-middle"></span>
