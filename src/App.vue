@@ -5,6 +5,7 @@ import { ensureMonacoEnvironment } from './monacoEnv'
 const apiBase = import.meta.env.VITE_API_BASE ?? ''
 const editorRef = ref(null)
 const consoleRef = ref(null)
+const aiAdviceRef = ref(null)
 
 const questionId = ref(Number(new URLSearchParams(window.location.search).get('id') || 1))
 const questionLoading = ref(false)
@@ -108,6 +109,20 @@ function buildApiUrl(path) {
   return `${apiBase}${path}`
 }
 
+function scrollConsoleToBottom() {
+  if (!consoleRef.value) {
+    return
+  }
+  consoleRef.value.scrollTop = consoleRef.value.scrollHeight
+}
+
+function scrollAiAdviceToBottom() {
+  if (!aiAdviceRef.value) {
+    return
+  }
+  aiAdviceRef.value.scrollTop = aiAdviceRef.value.scrollHeight
+}
+
 function pushLog(type, title, content) {
   consoleState.logs.push({
     id: crypto.randomUUID(),
@@ -115,14 +130,11 @@ function pushLog(type, title, content) {
     title,
     content
   })
-  nextTick(scrollConsoleToBottom)
-}
 
-function scrollConsoleToBottom() {
-  if (!consoleRef.value) {
-    return
-  }
-  consoleRef.value.scrollTop = consoleRef.value.scrollHeight
+  nextTick(() => {
+    scrollConsoleToBottom()
+    scrollAiAdviceToBottom()
+  })
 }
 
 function resetQuestionDetail() {
@@ -391,7 +403,10 @@ async function askAiCoach() {
           pushLog('success', 'AI', '辅导完成')
         }
 
-        nextTick(scrollConsoleToBottom)
+        nextTick(() => {
+          scrollConsoleToBottom()
+          scrollAiAdviceToBottom()
+        })
       }
     }
   } catch (error) {
@@ -591,8 +606,8 @@ onBeforeUnmount(() => {
           </div>
         </aside>
 
-        <section class="grid min-h-[900px] min-w-0 gap-5 xl:grid-rows-[minmax(620px,1.58fr)_minmax(220px,0.42fr)]">
-          <div class="editor-shell min-h-[620px] min-w-0 rounded-[30px] border border-orange-950/10 p-4 shadow-warm xl:flex xl:flex-col">
+        <section class="flex min-h-[980px] min-w-0 flex-col gap-5">
+          <div class="editor-shell h-[680px] min-h-[680px] min-w-0 shrink-0 rounded-[30px] border border-orange-950/10 p-4 shadow-warm xl:flex xl:flex-col">
             <div class="mb-4 flex shrink-0 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p class="font-mono text-xs uppercase tracking-[0.3em] text-amber-200/70">Code Workspace</p>
@@ -620,7 +635,7 @@ onBeforeUnmount(() => {
 
             <div class="mb-3 flex items-center justify-between text-xs text-amber-100/75">
               <span>当前语言：{{ language.toUpperCase() }}</span>
-              <span>Monaco Editor · LeetCode Style Layout</span>
+              <span>Monaco Editor · Stable Layout</span>
             </div>
 
             <div class="mb-4 h-1.5 shrink-0 overflow-hidden rounded-full bg-black/20">
@@ -633,7 +648,7 @@ onBeforeUnmount(() => {
             ></div>
           </div>
 
-          <div class="console-shell min-h-[220px] rounded-[30px] border border-orange-950/10 p-4 shadow-soft xl:flex xl:flex-col">
+          <div class="console-shell h-[300px] min-h-[300px] min-w-0 shrink-0 rounded-[30px] border border-orange-950/10 p-4 shadow-soft xl:flex xl:flex-col">
             <div class="mb-4 shrink-0 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p class="font-mono text-xs uppercase tracking-[0.3em] text-stone-500">Runtime Console</p>
@@ -650,16 +665,16 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <div ref="consoleRef" class="grid min-h-[160px] flex-1 gap-4 overflow-y-auto pr-1 lg:grid-cols-[0.9fr_1.1fr]">
-              <section class="rounded-[24px] border border-orange-950/10 bg-[#fff7ef] p-4">
+            <div class="grid min-h-0 flex-1 gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+              <section class="flex min-h-0 flex-col rounded-[24px] border border-orange-950/10 bg-[#fff7ef] p-4">
                 <div class="mb-3 flex items-center justify-between">
                   <span class="font-mono text-[11px] uppercase tracking-[0.24em] text-stone-500">Judge Output</span>
                   <span class="text-xs text-stone-500">{{ consoleState.message }}</span>
                 </div>
 
-                <pre class="min-h-28 whitespace-pre-wrap rounded-2xl border border-orange-950/10 bg-white/75 p-4 font-mono text-sm leading-6 text-stone-800">{{ consoleState.output || '暂无输出' }}</pre>
+                <pre class="min-h-[88px] shrink-0 whitespace-pre-wrap rounded-2xl border border-orange-950/10 bg-white/75 p-4 font-mono text-sm leading-6 text-stone-800">{{ consoleState.output || '暂无输出' }}</pre>
 
-                <div class="mt-4 space-y-2">
+                <div ref="consoleRef" class="mt-4 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
                   <article
                     v-for="item in consoleState.logs"
                     :key="item.id"
@@ -676,13 +691,16 @@ onBeforeUnmount(() => {
                 </div>
               </section>
 
-              <section class="rounded-[24px] border border-orange-950/10 bg-[#fff7ef] p-4">
+              <section class="flex min-h-0 flex-col rounded-[24px] border border-orange-950/10 bg-[#fff7ef] p-4">
                 <div class="mb-3 flex items-center justify-between">
                   <span class="font-mono text-[11px] uppercase tracking-[0.24em] text-stone-500">Tongyi Coach</span>
                   <span class="text-xs text-stone-500">SSE Stream</span>
                 </div>
 
-                <div class="paper-card min-h-28 whitespace-pre-wrap rounded-2xl p-4 font-mono text-sm leading-7 text-stone-800">
+                <div
+                  ref="aiAdviceRef"
+                  class="paper-card min-h-0 flex-1 overflow-y-auto whitespace-pre-wrap rounded-2xl p-4 font-mono text-sm leading-7 text-stone-800"
+                >
                   {{ consoleState.aiAdvice }}
                   <span v-if="aiLoading" class="ml-1 inline-block h-4 w-2 animate-pulse bg-orange-500 align-middle"></span>
                 </div>
