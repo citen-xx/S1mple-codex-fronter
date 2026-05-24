@@ -33,6 +33,10 @@ const consoleState = reactive({
   output: '',
   message: '等待运行',
   aiAdvice: '点击“求助通义千问”后，辅导内容会在这里流式出现。',
+  failedInput: '',
+  expectedOutput: '',
+  actualOutput: '',
+  failedCaseIndex: null,
   logs: [
     {
       id: crypto.randomUUID(),
@@ -70,6 +74,7 @@ int main() {
 let monaco
 let editor
 let abortAiStream
+let aiRequestSeq = 0
 
 const difficultyTone = computed(() => {
   const difficulty = (questionDetail.question.difficulty || '').toLowerCase()
@@ -312,11 +317,19 @@ async function runCode() {
     consoleState.status = result.data.status
     consoleState.output = result.data.output || ''
     consoleState.message = result.data.message || '评测完成'
+    consoleState.failedInput = result.data.failedInput || ''
+    consoleState.expectedOutput = result.data.expectedOutput || ''
+    consoleState.actualOutput = result.data.actualOutput || ''
+    consoleState.failedCaseIndex = result.data.failedCaseIndex ?? null
     pushLog('success', result.data.status, result.data.message || 'Judge finished')
   } catch (error) {
     consoleState.status = 'Request Failed'
     consoleState.output = ''
     consoleState.message = error.message || '评测失败'
+    consoleState.failedInput = ''
+    consoleState.expectedOutput = ''
+    consoleState.actualOutput = ''
+    consoleState.failedCaseIndex = null
     pushLog('error', 'Judge', consoleState.message)
   } finally {
     runLoading.value = false
@@ -327,12 +340,21 @@ function parseSseBlock(block) {
   const lines = block.split('\n')
   let eventName = 'message'
   const dataParts = []
+  let hasDataLine = false
 
   for (const line of lines) {
     if (line.startsWith('event:')) {
       eventName = line.slice(6).trim()
     } else if (line.startsWith('data:')) {
-      dataParts.push(line.slice(5).trim())
+      hasDataLine = true
+      dataParts.push(line.slice(5).replace(/^\s/, ''))
+    }
+  }
+
+  if (!hasDataLine) {
+    return {
+      event: 'message',
+      data: block
     }
   }
 
@@ -363,9 +385,18 @@ async function askAiCoach() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        questionTitle: questionDetail.question.title,
         questionContent: questionDetail.question.content,
+        language: language.value,
         wrongCode: currentCode(),
+        judgeStatus: consoleState.status,
+        judgeMessage: consoleState.message,
+        actualOutput: consoleState.actualOutput || consoleState.output || '',
+        expectedOutput: consoleState.expectedOutput || '',
+        failedInput: consoleState.failedInput || '',
+        failedCaseIndex: consoleState.failedCaseIndex,
         errorOutput: [consoleState.status, consoleState.message, consoleState.output || 'No runtime output'].join('\n')
+        // 当前版本暂未结构化采集失败用例输入和期望输出，后端保留了兼容字段。
       }),
       signal: controller.signal
     })
@@ -419,6 +450,119 @@ async function askAiCoach() {
     aiLoading.value = false
     abortAiStream = null
   }
+}
+
+async function askAiCoachManaged() {
+  if (!questionDetail.question.id) {
+    pushLog('error', 'AI', '请先加载题目')
+    return
+  }
+
+  if (abortAiStream) {
+    abortAiStream.abort()
+  }
+
+  const controller = new AbortController()
+  const requestSeq = ++aiRequestSeq
+  abortAiStream = controller
+  aiLoading.value = true
+  consoleState.aiAdvice = ''
+  pushLog('system', 'AI', 'Connecting to Qwen stream...')
+
+  try {
+    const response = await fetch(buildApiUrl('/api/ai/help'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        questionTitle: questionDetail.question.title,
+        questionContent: questionDetail.question.content,
+        language: language.value,
+        wrongCode: currentCode(),
+        judgeStatus: consoleState.status,
+        judgeMessage: consoleState.message,
+        actualOutput: consoleState.actualOutput || consoleState.output || '',
+        expectedOutput: consoleState.expectedOutput || '',
+        failedInput: consoleState.failedInput || '',
+        failedCaseIndex: consoleState.failedCaseIndex,
+        errorOutput: [consoleState.status, consoleState.message, consoleState.output || 'No runtime output'].join('\n')
+      }),
+      signal: controller.signal
+    })
+
+    if (requestSeq !== aiRequestSeq) {
+      return
+    }
+    if (!response.ok || !response.body) {
+      throw new Error(`AI 请求失败: HTTP ${response.status}`)
+    }
+
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder('utf-8')
+    let buffer = ''
+
+    while (true) {
+      const { value, done } = await reader.read()
+      if (requestSeq !== aiRequestSeq) {
+        break
+      }
+      if (done) {
+        break
+      }
+
+      buffer += decoder.decode(value, { stream: true })
+      const blocks = buffer.split('\n\n')
+      buffer = blocks.pop() || ''
+
+      for (const block of blocks) {
+        if (!block.trim()) {
+          continue
+        }
+        if (requestSeq !== aiRequestSeq) {
+          break
+        }
+
+        const payload = parseSseBlock(block)
+        if (payload.event === 'message') {
+          consoleState.aiAdvice += payload.data
+        } else if (payload.event === 'error') {
+          consoleState.aiAdvice += `\n[error] ${payload.data}`
+          pushLog('error', 'AI', payload.data)
+        } else if (payload.event === 'done') {
+          pushLog('success', 'AI', 'AI analysis completed')
+        }
+
+        nextTick(() => {
+          scrollConsoleToBottom()
+          scrollAiAdviceToBottom()
+        })
+      }
+    }
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      if (requestSeq === aiRequestSeq) {
+        pushLog('system', 'AI', '已停止生成')
+      }
+    } else {
+      const message = error.message || 'AI 分析连接已中断'
+      consoleState.aiAdvice += `\n[error] ${message}`
+      pushLog('error', 'AI', message)
+    }
+  } finally {
+    if (requestSeq === aiRequestSeq) {
+      aiLoading.value = false
+      abortAiStream = null
+    }
+  }
+}
+
+function stopAiCoach() {
+  if (!abortAiStream) {
+    return
+  }
+  abortAiStream.abort()
+  aiLoading.value = false
+  abortAiStream = null
+  aiRequestSeq += 1
 }
 
 onMounted(async () => {
@@ -626,9 +770,17 @@ onBeforeUnmount(() => {
                 <button
                   class="warm-button-accent rounded-[20px] px-5 py-3 text-sm font-semibold transition"
                   :disabled="aiLoading"
-                  @click="askAiCoach"
+                  @click="askAiCoachManaged"
                 >
                   {{ aiLoading ? '求助中...' : '求助通义千问' }}
+                </button>
+
+                <button
+                  class="rounded-[20px] border border-amber-100/35 px-5 py-3 text-sm font-semibold text-amber-50 transition disabled:opacity-40"
+                  :disabled="!aiLoading"
+                  @click="stopAiCoach"
+                >
+                  停止生成
                 </button>
               </div>
             </div>
